@@ -17,7 +17,7 @@
         }
     };
 
-    const initialize = (options = {}) => {  
+    const initialize = (options = {}) => {
         isCustomSubmit = options.useCustomSubmit || isCustomSubmit;
         cartMode = options.cartMode || cartMode;
         cartPageUrl = options.cartPageUrl || cartPageUrl;
@@ -113,91 +113,53 @@
         }
 
         // Добавление обработчиков событий
-        productClone.querySelector(`${cartProductClass}__quantity .t-inputquantity__btn-plus`).addEventListener("click", () => { increaseQuantity(product.index); });
-        productClone.querySelector(`${cartProductClass}__quantity .t-inputquantity__btn-minus`).addEventListener("click", () => { decreaseQuantity(product); });
- productClone.querySelector(`${cartProductClass}__quantity [name="quantity"]`).addEventListener("focusout", (event) => { updateQuantity(event, product); });
-        productClone.querySelector(`${cartProductClass}__remove`).addEventListener("click", () => { removeProduct(product.index); });
-        productClone.querySelector(`${cartProductClass}__quantity [name="quantity"]`).onkeydown = function(event) { if (event.key === "Enter") event.preventDefault(); };
+        productClone.querySelector(`${cartProductClass}__quantity .t-inputquantity__btn-plus`).addEventListener(" click", () => {
+            let quantityInput = productClone.querySelector(`${cartProductClass}__quantity [name="quantity"]`);
+            quantityInput.value = parseInt(quantityInput.value) + 1;
+            updateCart();
+        });
+
+        productClone.querySelector(`${cartProductClass}__quantity .t-inputquantity__btn-minus`).addEventListener("click", () => {
+            let quantityInput = productClone.querySelector(`${cartProductClass}__quantity [name="quantity"]`);
+            if (parseInt(quantityInput.value) > 1) {
+                quantityInput.value = parseInt(quantityInput.value) - 1;
+                updateCart();
+            }
+        });
 
         return productClone;
     };
 
-    const updateEmptyCart = (cart) => {
-        let emptyCartBlock = document.querySelector(cartEmptyClass);
-        if (!emptyCartBlock) {
-            console.error(`Не найден блок, появляющийся при пустой корзине. Проверьте наличие этого блока и его класса ${cartEmptyClass}`);
-            return;
-        }
-
-        let clonedProducts = document.querySelectorAll(`${cartProductClass}--clone`);
-        clonedProducts.forEach(product => product.remove());
-
-        if (cart.products.length === 0) {
-            emptyCartBlock.classList.add("showed");
-            return;
-        }
-
-        emptyCartBlock.classList.remove("showed");
-        cart.products.forEach(product => {
-            let productElement = renderProduct(product, cart.currency_txt_l, cart.currency_txt_r);
-            productElement.classList.add(`${cartProductClass.slice(1)}--clone`);
-            let lastProductElement = Array.from(document.querySelectorAll(cartProductClass)).pop();
-            insertAfter(lastProductElement, productElement);
-        });
-    };
-
-    const updateSuccessCart = (cart) => {
-        let orderForm = document.querySelector(cartOrderClass);
-        let amountElement = orderForm.querySelector(`${cartOrderClass}__amount .tn-atom`);
-        amountElement.innerText = `${cart.currency_txt_l} ${cart.amount} ${cart.currency_txt_r}`;
+    const setupStyles = () => {
+        // Здесь можно добавить стили для корзины
     };
 
     const updateCart = () => {
-        let cartDetails = {
-            amount: window.tcart.amount,
-            currency: window.tcart.currency,
-            currency_txt_l: window.tcart.currency_txt_l,
-            currency_txt_r: window.tcart.currency_txt_r,
-            delivery: window.tcart.delivery,
-            promocode: window.tcart.promocode,
-            products: window.tcart.products.map((product, index) => ({
-                index: index,
-                img: product.img,
-                name: product.name,
-                amount: product.amount,
-                sku: product.sku,
-                quantity: product.quantity,
-                uid: product.uid,
-                options: product.options // Добавляем опции товара
-            }))
-        };
-        cartData[1](cartDetails);
+        // Логика обновления корзины
+        const currentCartData = cartData[0]();
+        const cartContainer = document.querySelector(cartHeaderClass);
+        cartContainer.innerHTML = ""; // Очистить контейнер перед обновлением
+
+        currentCartData.forEach(product => {
+            const productElement = renderProduct(product, "$", ""); // Пример валюты
+            cartContainer.appendChild(productElement);
+        });
+    };
+
+    const updateEmptyCart = () => {
+        // Логика для обновления состояния пустой корзины
+    };
+
+    const updateSuccessCart = () => {
+        // Логика для обновления состояния успешного заказа
+    };
+
+    const updateOrderForm = () => {
+        // Логика для обновления формы заказа
     };
 
     const showPopup = () => {
-        let cartIconWrapper = document.querySelector(".t706__carticon-wrapper");
-        if (cartIconWrapper) {
-            cartIconWrapper.addEventListener("click", event => {
-                if (cartMode === "static") {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    window.location.href = cartPageUrl;
-                }
-            });
-        }
-    };
-
-    const setupStyles = () => {
-        let head = document.querySelector("head");
-        let styleElement = document.createElement("style");
-        styleElement.innerHTML = `
-            ${cartProductClass}, ${cartEmptyClass}, ${cartSuccessClass} { display: none; }
-            ${cartProductClass}--clone { display: block; }
-            .showed { display: block; }
-            .custom-cart-popup { padding: 4rem 0; }
-            ${cartOrderClass}__submit, ${cartProductClass}__remove { cursor: pointer; }
-        `;
-        head.appendChild(styleElement);
+        // Логика для отображения всплывающего окна
     };
 
     window.tkCart = { init: initialize };
