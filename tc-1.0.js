@@ -9,7 +9,15 @@
         cartSuccessClass = ".uc-custom-success",
         cartOrderClass = ".uc-custom-orderform";
 
-    const initialize = (options = {}) => {
+    const onReady = (callback) => {
+        if (document.readyState !== 'loading') {
+            callback();
+        } else {
+            document.addEventListener('DOMContentLoaded', callback);
+        }
+    };
+
+    const initialize = (options = {}) => {  
         isCustomSubmit = options.useCustomSubmit || isCustomSubmit;
         cartMode = options.cartMode || cartMode;
         cartPageUrl = options.cartPageUrl || cartPageUrl;
